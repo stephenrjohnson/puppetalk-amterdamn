@@ -1,0 +1,37 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant::Config.run do |config|
+
+  config.vm.define :master do |box_config|
+    box_config.vm.box = 'ubuntu-1204'
+    box_config.vm.host_name  = 'master.puppetlabs.vm'
+    box_config.vm.box_url = 'http://puppet-vagrant-boxes.s3.amazonaws.com/ubuntu-server-1204-x64.box'
+    box_config.vm.customize ["modifyvm", :id, "--memory", 1024]
+    box_config.vm.customize ["modifyvm", :id, "--cpus", 2]
+    box_config.vm.customize ["modifyvm", :id, "--name", 'master.puppetlabs.vm']
+    box_config.vm.network :hostonly, '172.16.0.2', :adapter => 2
+    box_config.vm.share_folder "nagios", "/demo", "./demo"
+    box_config.vm.provision :puppet do | puppet|
+        puppet.manifest_file = 'master.pp'
+        puppet.manifests_path = './manifests'
+        puppet.module_path = '../../modules'
+    end
+ end
+
+ config.vm.define :agent do |box_config|
+        box_config.vm.box = 'ubuntu-1204'
+        box_config.vm.box_url = 'https://github.com/downloads/benburkert/bootstrap-razor/pxe-blank.box'
+        box_config.ssh.port = 2222
+        box_config.vm.host_name  = 'agent.puppetlabs.vm'
+        box_config.vm.customize ["modifyvm", :id, "--name", 'agent.puppetlabs.vm']
+        box_config.vm.network :hostonly, '172.16.0.3', :adapter => 2
+        box_config.vm.provision :puppet do | puppet|
+          puppet.manifest_file = 'agent.pp'
+          puppet.manifests_path = './manifests'
+          puppet.module_path = '../../modules'
+        end
+  end
+
+
+end
