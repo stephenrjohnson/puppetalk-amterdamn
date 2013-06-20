@@ -1,0 +1,6 @@
+define service{
+        use            <%= @use %> 
+        host_name      <%= @hostname %>
+        service_description <%= @desc %>
+        check_command        <%= @command %>
+}
